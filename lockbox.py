@@ -3,6 +3,9 @@ from pathlib import Path  ## to work with file paths easily
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM # # AESGCM is a class from the cryptography library for encryption 
 import os, secrets # # for generating secure random bytes # Designed for cryptography
 import sys
+import argparse
+import getpass
+
 
 
 MAGIC = b"LB1" # 3-byte identifier for "lockbox v1" ## This helps us recognize our own encrypted files later. #This helps later in decrypt() to check: “is this a file I encrypted?”
@@ -55,7 +58,7 @@ def decrypt(path: Path, password: str) -> None: #path: the .pv file (e.g. family
     
     print(f"Decrypted: {path.name} to {out_path.name}")
 
-
+    path.unlink() # deleted the .pv file after successfull decryption
 
 
 
