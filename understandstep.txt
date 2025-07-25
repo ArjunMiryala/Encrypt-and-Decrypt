@@ -1,0 +1,64 @@
+🔐 What is derive_key()?
+Passwords are not secure keys. To use AES-256-GCM, we need a 256-bit (32-byte) key.
+
+So we’ll use scrypt, a password-based key derivation function (PBKDF) that:
+
+is slow by design (to block brute-force attackers),
+
+uses salt (to prevent rainbow table attacks),
+
+outputs a fixed-length binary key.
+
+
+🔐 Step 1: derive_key() — Line-by-Line Breakdown
+We’ll write the function first principles style so that nothing feels like magic.
+
+❓ What is this function doing?
+We're turning a human password (e.g. "hello123") into a 256-bit cryptographic key. Why?
+
+Because AES‑GCM needs a raw binary key: 32 bytes for AES‑256
+
+We can't use strings directly — they're guessable & not binary
+
+So we run it through scrypt, a "slow hash function" for passwords
+
+
+🔐 Step 2: encrypt() — Encrypt a File using AES-GCM
+🧠 The Big Picture
+Here’s what this function does:
+
+Action	Why it matters
+Read the file	We want to encrypt its content.
+Generate a random salt	Used to create a unique key from the password.
+Derive a secure key	Converts human password into strong 256-bit key.
+Generate a random nonce	Prevents attackers from seeing patterns.
+Encrypt using AES‑GCM	Authenticated, modern, secure encryption.
+Save encrypted data	Into a .pv file with salt/nonce attached.
+
+
+🔓 Step 3: decrypt() — Reverse AES-GCM and get your original file back
+🧠 The Big Picture
+We want to:
+
+Open the encrypted file (with .pv extension)
+
+Check if it's really one of our files (via MAGIC header)
+
+Extract:
+
+the salt (used to derive key)
+
+the nonce (used during encryption)
+
+the ciphertext (encrypted file data)
+
+Rebuild the key using the salt and password
+
+Decrypt the ciphertext using AES-GCM
+
+Write the decrypted file back to disk
+
+**data in the encryot funtion is turned into cyoher text so e=when de crypting it we use use it in the decrypt method 
+data = aesgcm.decrypt(nonce, ciphertext, None)
+
+**
