@@ -61,12 +61,33 @@ def decrypt(path: Path, password: str) -> None: #path: the .pv file (e.g. family
     path.unlink() # deleted the .pv file after successfull decryption
 
 
+def main() -> None:
+    parser = argparse.ArgumentParser(description="lockbox - encrypt & decrypt fils securly") #description=... is shown when someone runs python lockbox.py --help #Creates the top-level parser that handles command-line arguments
+    sub = parser.add_subparsers(dest="command", required= True) #Adds subcommands like encrypt and decrypt #dest="command" means: store the subcommand name (e.g., "encrypt") in args.command
+    #required=True: the user must specify one of the subcommands, or it’ll show a help message
+ 
+    encrypt_parser = sub.add_parser("encrypt", help="Encrypt a file") #Adds a subcommand called encrypt 
+    encrypt_parser.add_argument("file", type=Path) #type=Path means the argument will be converted into a Path object from pathlib #Requires 1 positional argument: the path to the file you want to encrypt
 
 
+    decrypt_parser = sub.add_parser("decrypt", help="Decrypt a .pv file") #Adds a subcommand called decrypt
+    decrypt_parser.add_argument("file", type=Path) #same as encypt expects a 1 positional argument(in this case encrypted .pv file)
 
-if __name__ == "__main__":
-    import os
-    password = b"my_super_secret_password"
-    salt = os.urandom(16)  # 128-bit random salt
-    key = derive_key(password, salt)
-    print("Derived key:", key.hex())
+    args = parser.parse_args() #parses the arguments from the commandline and puts them in args object
+    # we can now access args.command(to "encrypt" or "decrypt") , args.file (a path object for the file)
+
+    password = getpass.getpass("Master password: ") # Asks the user to type  a password withput showing it on screen
+    # this is uses built-in getpass module #then the password is passed to encrypt() or decrypt()
+
+    try: # This block decides which function to run
+        if args.command =="encrypt":
+            encrypt(args.file, password)          #It checks if the subcommand was "encrypt" or "decrypt"
+        elif args.command == "decrypt":           #Then calls the corresponding function with the file path and password
+            decrypt(args.file, password)          
+    except Exception as e: #If any error happens (bad password, file not found, etc.), Exception catches it and exits cleanly(sys.exit()) #Exception is base class for all normal python errors
+        sys.exit(f"error: {e}") # shows the error messages # here e is the error #try lets us catch those issues and show the user a nice message.
+
+    
+
+if __name__ == "__main__":  #python convention # checks if the file is being run directly(python lockbox.py) then it calls main() and runs CLI
+    main()
