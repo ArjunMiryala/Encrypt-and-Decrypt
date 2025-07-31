@@ -1,5 +1,5 @@
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt # scrypt module imported, kdf.scrypt gives us the Scrypt key derivation function (KDF).
-from pathlib import Path  ## to work with file paths easily
+from pathlib import Path  ## to work with file paths easily # helps us to create path objects
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM # # AESGCM is a class from the cryptography library for encryption 
 import os, secrets # # for generating secure random bytes # Designed for cryptography
 import sys
@@ -27,11 +27,11 @@ def derive_key(password: bytes, salt: bytes) -> bytes: #the password must be con
 
 def encrypt(path: Path,password: str) -> None: #path = the file you want to encrypt #password = the master password to lock it
    # Path is from pathlib and makes file handling cross-platform and safer than using plain strings.
-   #encrypt(Path("family.jpg"), "Arjun")
+   #example: encrypt(Path("family.jpg"), "Arjun")
     data = path.read_bytes() #read the file contents #This loads the entire file into memory as binary (bytes) ,,,use read_bytes() because it works even for images, PDFs, zip files
     salt = secrets.token_bytes(SALT_LEN) # generating random salt of 16bytes, salt is not secret but it should be random and unique per file. salt is saved in outputfile, for getting key during decryption
     nonce = secrets.token_bytes(NONCE_LEN)# Generate a random nonce (IV) #it is "number used once", for ARS-GCM must be unique per encryption, 12 bytes is standard& required by ARSGCM class & It also helps generate the authentication tag
-    KEY = derive_key(password.encode(), salt) #password.encode() converts "hello123" into b"hello123" (bytes required)#So this line gives you a secure 256-bit binary key based on the user's password and the random salt
+    key = derive_key(password.encode(), salt) #password.encode() converts "hello123" into b"hello123" (bytes required)#So this line gives you a secure 256-bit binary key based on the user's password and the random salt
     #I already wrote derive_key()
     aesgcm = AESGCM(key) #We give it the key and use .encrypt()
     ciphertext = aesgcm.encrypt(nonce, data, None)  # #associated_data is optional so I give None here because Iam not attaching anything extra. # # result is ciphertext with authentication tag
